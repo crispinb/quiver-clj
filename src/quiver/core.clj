@@ -2,10 +2,12 @@
 
 (defn get-json [filename]
   (->
-       ;; best way to test for existence of the resource?
-;; and perhaps validate the json?
-    io/resource
-    slurp))
+   filename
+   ;; best way to test for existence of the resource?
+   ;; and perhaps validate the json?
+   io/resource
+   slurp))
 
 (get-json "test-file.json")
 
+(get-json "test-data2.json")
