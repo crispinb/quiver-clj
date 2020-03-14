@@ -9,4 +9,3 @@
 
 (get-json "test-file.json")
 
-(.toUpperCase to"fark")
