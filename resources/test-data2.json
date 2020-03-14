@@ -1,3 +1,4 @@
 {
-  "new": "json"
+    "new": "json",
+    "another key": "more data"
 }
