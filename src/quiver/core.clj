@@ -1,6 +1,11 @@
-(ns quiver.core)
+(ns quiver.core (:require [clojure.java.io :as io]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(defn get-json [filename]
+  (->
+    filename
+    ;; best way to test for existence of the resource?
+;; and perhaps validate the json?
+    io/resource
+    slurp))
+
+(get-json "test-file.json")
