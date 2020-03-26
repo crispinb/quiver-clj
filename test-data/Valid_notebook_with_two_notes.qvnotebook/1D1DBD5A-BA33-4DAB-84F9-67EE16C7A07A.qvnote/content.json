@@ -1,0 +1,14 @@
+{
+  "title": "Valid Note",
+  "cells": [
+    {
+      "type": "markdown",
+      "data": "note data"
+    },
+      {
+      "type": "code",
+      "language": "rust",
+      "data": "let x: String"
+    }
+  ]
+}

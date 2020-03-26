@@ -1,0 +1,14 @@
+{
+  "title": "Test Note",
+  "cells": [
+    {
+      "type": bad bad
+      "data": "note data"
+    },
+      {
+      "type": "code",
+      "language": "rust",
+      "data": "let x: String"
+    }
+  ]
+}
