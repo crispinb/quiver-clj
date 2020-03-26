@@ -1,24 +1,9 @@
 (ns quiver.core (:require
-                 [clojure.java.io :as io]
-                 [clojure.string :as str]
-                 [clojure.data.json :as json]))
-
-(defn get-file-contents [filename]
-  (->
-   filename
-   slurp))
+                 [quiver.lib :as lib]))
 
 (def valid-notebook "test-data/Valid_notebook_with_two_notes.qvnotebook/")
 
-(defn is-note? [name]
-  (str/ends-with? name ".qvnote"))
+;; todo: make this into a commandline app
+;; convert to tools deps using minimalist https://github.com/clojure/tools.cli
 
-(defn seq-note-paths [path]
-  (map #(str (.getAbsolutePath %1) "/meta.json")
-       (filter #(is-note? (.getName %1)) (file-seq (io/file path)))))
-
-
-(defn seq-note-metadata [note-paths]
-  (map json/read-str (map #(get-file-contents %1) note-paths)))
-
-(seq-note-metadata (seq-note-paths valid-notebook))
+(lib/seq-note-metadata (lib/seq-note-paths valid-notebook))
