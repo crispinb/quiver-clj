@@ -4,8 +4,7 @@
 
 (def valid-notebook "test-data/Valid_notebook_with_two_notes.qvnotebook/")
 
-;; todo: make this into a commandline app
-;; convert to tools deps using minimalist https://github.com/clojure/tools.cli
+;; accept notebook fiel path argument  https://github.com/clojure/tools.cli
 
 
 (defn -main [& args]
