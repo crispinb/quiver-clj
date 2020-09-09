@@ -3,52 +3,59 @@
                 [clojure.string :as str]
                 [clojure.data.json :as json]))
 
-(defn get-file-contents [filename]
-  (->
-   filename
-   slurp))
+(defn- file->string 
+  "Simplistically read file as string. Return nil on any exception"
+  [filename]
+  (try (->
+        filename
+        slurp)
+       (catch Exception _ nil)))
 
-(defn is-note? [name]
+(defn- is-note? [name]
   (str/ends-with? name ".qvnote"))
 
-(defn note-paths [path]
-  (filter #(is-note? (.getName %1)) (file-seq (io/file path))))
+(defn- note-paths 
+  "Returns seq of all notes within notebook"
+  [notebook-path]
+  (filter #(is-note? (.getName %1)) (file-seq (io/file notebook-path))))
 
-;; TODO use java path append func
-(defn append-to-path [segment path]
+(defn- append-to-path [segment path]
   (str (.getAbsolutePath path) "/" segment))
 
-(defn note-content-paths [path]
-  (map  (partial append-to-path "/content.json") (note-paths path)))
+(defn- note-content-paths [notebook-path]
+  (map  (partial append-to-path "/content.json") (note-paths notebook-path)))
 
-(defn note-metadata-paths [path]
-  (map (partial append-to-path "/meta.json") (note-paths path)))
+(defn- note-metadata-paths [path]
+  (map (partial append-to-path "meta.json") (note-paths path)))
 
-(defn note-metadata [note-metadata-paths]
-  (map json/read-str (map #(get-file-contents %1) note-metadata-paths)))
+(defn- note-metadata [note-metadata-paths]
+  (map json/read-str (map #(file->string %1) note-metadata-paths)))
 
-(defn note-summaries [notebook-path]
+;; needed?
+(defn- note-summaries [notebook-path]
   (let [notes (note-metadata (note-metadata-paths notebook-path))]
     (map #(select-keys %1 ["title" "uuid"]) notes)))
 
-(defn notes-metadata [notebook-path]
+(defn- notes-metadata [notebook-path]
   (note-metadata (note-metadata-paths notebook-path)))
 
-;; todo -use the new note-summaires instead of note-titles from cmdline
-;; then allow selection here by uuid for contents
-;; then select bynumber instad (I'll have to assign)
-(defn note-contents [notebook-path]
-  ;; TODO
-  )
-
-(def valid-notebook "test-data/Valid_notebook_with_two_notes.qvnotebook/")
-(notes-metadata valid-notebook)
-(note-summaries valid-notebook)
+;; // get each note, content & metadata into a single data structure.
+;; // id by uuid presumably
 
 (comment
-  (println "fark")
-  (let [valid-notebook "test-data/Valid_notebook_with_two_notes.qvnotebook/"]
-    valid-notebook
-    (note-titles valid-notebook)
-    (note-content-paths valid-notebook)
-    (println (note-metadata (note-metadata-paths valid-notebook)))))
+  (def valid-notebook "test-data/Valid_notebook_with_two_notes.qvnotebook")
+  (def no-notebook "ya/wanker/no")
+  valid-notebook
+  (note-paths valid-notebook)
+  (note-paths no-notebook)
+  (note-metadata-paths valid-notebook)
+  (note-metadata (note-metadata-paths valid-notebook))
+  (note-summaries valid-notebook)
+  (note-summaries no-notebook)
+  (first (note-metadata (note-metadata-paths valid-notebook)))  
+  (get-file-contents valid-notebook)
+  (first (note-metadata valid-notebook))
+  (note-metadata valid-notebook)
+  (note-titles valid-notebook)
+  (note-content-paths valid-notebook)
+  (println (note-metadata (note-metadata-paths valid-notebook))))
