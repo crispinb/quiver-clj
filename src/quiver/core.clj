@@ -16,11 +16,11 @@
 (def cmdline-options [["-d" "--notebookdir Notebook directory"]
                       ["-h" "--help"]])
 
-(defn -main [& args]
-  (println "received args " args)
-  (let [opts (parse-opts args cmdline-options)]
-    (println "opts: " opts)
-    (lib/note-titles (get-in opts [:options :notebookdir]))))
+;; (defn -main [& args]
+;;   (println "received args " args)
+;;   (let [opts (parse-opts args cmdline-options)]
+;;     (println "opts: " opts)
+;;     (lib/note-titles (get-in opts [:options :notebookdir]))))
     ; (if (seq titles)
     ;   (println (str "Your titles Sir: \n" (pr-str titles)))
     ;   (println (str "No notes found at that location")))))
