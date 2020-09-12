@@ -1,6 +1,7 @@
 (ns quiver.lib (:require
                 [clojure.java.io :as io]
                 [clojure.string :as str]
+                [clojure.walk :as walk]
                 [clojure.data.json :as json]))
 
 (defn- file->string 
@@ -45,4 +46,5 @@
   (-> notebook-path
       note-dirs
       note-data-dirs
-      parse-notes))
+      parse-notes
+      walk/keywordize-keys))

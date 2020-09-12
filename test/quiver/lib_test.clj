@@ -2,17 +2,22 @@
   (:require 
    [clojure.java.io :as io]
    [clojure.test :refer :all]
-   [quiver.lib :refer :all]))
+   [quiver.lib :as lib]))
 
-  (def valid-notebook "Valid_notebook_with_two_notes.qvnotebook")
+  (def valid-notebook (atom nil))
+  (use-fixtures :once 
+    (fn [testf] 
+      (reset! valid-notebook
+              (lib/load-notes (io/resource "Valid_notebook_with_two_notes.qvnotebook"))) 
+                        (testf)))
 
-(deftest test_test 
-  (testing "valid note"
-    (let [n (load-notes (io/resource valid-notebook))]
-      (is (= (count n) 2))
-      (is (= "Valid note" ((first n) "title")))
-      (println n))
-    ))
+(deftest valid-notes 
+  (testing "notes are retrieved"
+    (is (= 2 (count @valid-notebook))))
+  (testing "basic props"
+    (is (= "Valid Note" (:title (first @valid-notebook))))))
+  
+  (deftest invalid-notes)
 
 
 (comment
