@@ -46,20 +46,3 @@
       note-dirs
       note-data-dirs
       parse-notes))
-
-
-
-(comment
-  (def valid-notebook "test-data/Valid_notebook_with_two_notes.qvnotebook")
-  (def no-notebook "ya/wanker/no")
-  (def empty-notebook "test-data/Empty.qvnotebook")
-  (def invalid-note-json "test-data/Has_note_with_invalid_note_json.qvnotebook")
-  (def note-with-missing-metadata "test-data/Has_note_with_missing_metadata.qvnotebook")
-  (def note-with-zero-content "test-data/Has_note_with_zero_content.qvnotebook")
-  (load-notes valid-notebook)
-  (load-notes no-notebook)
-  (load-notes empty-notebook)
-  (load-notes invalid-note-json)
-  (load-notes note-with-missing-metadata)
-  (load-notes note-with-zero-content)
-    )
