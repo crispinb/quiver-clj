@@ -5,11 +5,21 @@
    [quiver.lib :as lib]))
 
   (def valid-notebook (atom nil))
+  (def empty-notebook (atom nil))
+  (def invalid-json-notebook (atom nil))
+  
+  ;; this throws a json parsing error
+  ;; TODO: what's a good clojury way to deal with this?
+  (defn load-invalid-notebook []
+    (lib/load-notes (io/resource "Has_note_with_invalid_note_json.qvnotebook")))
+  
   (use-fixtures :once 
     (fn [testf] 
       (reset! valid-notebook
-              (lib/load-notes (io/resource "Valid_notebook_with_two_notes.qvnotebook"))) 
-                        (testf)))
+              (lib/load-notes (io/resource "Valid_notebook_with_two_notes.qvnotebook")))
+      (reset! empty-notebook
+              (lib/load-notes (io/resource "Empty.qvnotebook"))) 
+      (testf)))
 
 (deftest valid-notes 
   (testing "notes are retrieved"
@@ -17,7 +27,11 @@
   (testing "basic props"
     (is (= "Valid Note" (:title (first @valid-notebook))))))
   
-  (deftest invalid-notes)
+  (deftest invalid-notes
+    (testing "empty note"
+      (is (= 0 (count @empty-notebook))))
+    (testing "invalid json note"
+      (is (= 0 (count @invalid-json-notebook)))))
 
 
 (comment
