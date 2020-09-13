@@ -4,6 +4,12 @@
                 [clojure.walk :as walk]
                 [clojure.data.json :as json]))
 
+;; error handling
+;; For now - any note file (metadata or content) with an error has the
+;; :error key added (with exception as the value).
+;; This is easy to check, and somewhat forgiving, in that the note may
+;; yet contain some useful data
+
 (defn- file->string 
   "Simplistically read file as string. Return nil on any exception"
   [filename]
@@ -26,7 +32,7 @@
 (defn- file->json [f]
   (try 
     (json/read-str (file->string f))
-    (catch Exception e (println "Exception caught during processing of " f ", exception: " e))))
+    (catch Exception e {:error e})))
 
 (defn- note-data-dirs
   "Takes seq of Java.io.file representing note dirs.\nReturns seq of vecs, each vec being a tuple of paths of a notes content & meta files"
@@ -36,7 +42,7 @@
 (defn- parse-notes
   "Takes seq of tuples of note content & metadata filepaths. \nReturns map of notes"
   [note-data]
-  ;; mapcat here returns the json objects for the file metadata & contents as key/val tuples. Both maps have the 'title' key.
+  ;; mapcat here flattens the json objects for the file metadata & contents into key/val tuples for coalescing into one map. Both original maps have the 'title' key.
   (map #(into {} (mapcat  file->json %)) note-data)
 )
 

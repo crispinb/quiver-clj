@@ -1,37 +1,42 @@
 (ns quiver.lib-test
-  (:require 
+  (:require
    [clojure.java.io :as io]
    [clojure.test :refer :all]
    [quiver.lib :as lib]))
 
-  (def valid-notebook (atom nil))
-  (def empty-notebook (atom nil))
-  (def invalid-json-notebook (atom nil))
-  
-  ;; this throws a json parsing error
-  ;; TODO: what's a good clojury way to deal with this?
-  (defn load-invalid-notebook []
-    (lib/load-notes (io/resource "Has_note_with_invalid_note_json.qvnotebook")))
-  
-  (use-fixtures :once 
-    (fn [testf] 
-      (reset! valid-notebook
-              (lib/load-notes (io/resource "Valid_notebook_with_two_notes.qvnotebook")))
-      (reset! empty-notebook
-              (lib/load-notes (io/resource "Empty.qvnotebook"))) 
-      (testf)))
+(def valid-notebook "Valid_notebook_with_two_notes.qvnotebook")
+(def empty-notebook "Empty.qvnotebook")
+(def invalid-content-json-notebook "Has_note_with_invalid_note_json.qvnotebook")
+(def invalid-metadata-json-notebook "Has_note_with_invalid_metadata_json.qvnotebook")
+(def missing-data-files-notebook "Has_note_with_missing_data_files.qvnotebook")
 
-(deftest valid-notes 
+(deftest valid-notes
+(let [nbpath (io/resource valid-notebook)
+      nb (lib/load-notes nbpath)]
+  (testing "titles are retrieved"
+    (is (= 2 (count (lib/load-titles nbpath)))))
   (testing "notes are retrieved"
-    (is (= 2 (count @valid-notebook))))
+    (is (= 2 (count nb))))
   (testing "basic props"
-    (is (= "Valid Note" (:title (first @valid-notebook))))))
+    (is (= "Valid Note" (:title (first nb)))))))
+
+(deftest invalid-notes
+  (testing "empty note"
+    (is (= 0 (count (lib/load-notes (io/resource empty-notebook))))))
+  (testing "invalid metadata json note"
+    (let [note (lib/load-notes (io/resource invalid-metadata-json-notebook))]
+      (is (= 2 (count note)))
+      (is (some #(contains? % :error) note))))
   
-  (deftest invalid-notes
-    (testing "empty note"
-      (is (= 0 (count @empty-notebook))))
-    (testing "invalid json note"
-      (is (= 0 (count @invalid-json-notebook)))))
+  (testing "invalid content json note"
+    (let [note (lib/load-notes (io/resource invalid-content-json-notebook))]
+      (is (= 2 (count note)))
+      (is (some #(contains? % :error) note))))
+  
+  (testing "note with missing files"
+    (let [note (lib/load-notes (io/resource missing-data-files-notebook))]
+      (is (= 1 (count note)))
+      (is (some #(contains? % :error) note)))))
 
 
 (comment
