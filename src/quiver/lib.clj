@@ -24,7 +24,9 @@
   (str (.getAbsolutePath path) "/" segment))
 
 (defn- file->json [f]
-  (json/read-str (file->string f)))
+  (try 
+    (json/read-str (file->string f))
+    (catch Exception e (println "Exception caught during processing of " f ", exception: " e))))
 
 (defn- note-data-dirs
   "Takes seq of Java.io.file representing note dirs.\nReturns seq of vecs, each vec being a tuple of paths of a notes content & meta files"
@@ -38,13 +40,24 @@
   (map #(into {} (mapcat  file->json %)) note-data)
 )
 
+(defn load-titles 
+  [nbpath]
+  (->> nbpath
+       (note-dirs)
+       (map (partial append-to-path "meta.json"))
+       (map #(file->json %))
+       (walk/keywordize-keys)
+       (map :title)))
+
 (defn load-notes
   "Takes a string path to a Quiver notebook directory, returning a seq of maps
    representing the notes therein.\n
    Returns an empty seq if anything goes wrong (the path doesn't exist, the notes are faulty, etc)"
-  [notebook-path]
-  (-> notebook-path
+  [nbpath]
+  (-> nbpath
       note-dirs
       note-data-dirs
       parse-notes
       walk/keywordize-keys))
+
+(comment (def n (note-dirs "Valid_notebook_with_two_notes.qvnotebnook")))
