@@ -42,7 +42,7 @@
 (defn- parse-notes
   "Takes seq of tuples of note content & metadata filepaths. \nReturns map of notes"
   [note-data]
-  ;; mapcat here flattens the json objects for the file metadata & contents into key/val tuples for coalescing into one map. Both original maps have the 'title' key.
+  ;; mapcat here flattens the json objects for the file metadata & contents into key/val tuples for coalescing into one map. Both original maps have the 'title' key but are otherwise disjoint
   (map #(into {} (mapcat  file->json %)) note-data)
 )
 
@@ -58,7 +58,7 @@
 (defn load-notes
   "Takes a string path to a Quiver notebook directory, returning a seq of maps
    representing the notes therein.\n
-   Returns an empty seq if anything goes wrong (the path doesn't exist, the notes are faulty, etc)"
+   Returns an empty seq if the notebook doesn't exist or is empty"
   [nbpath]
   (-> nbpath
       note-dirs
