@@ -8,6 +8,16 @@
 (def get-token-url-seg "auth/login.json?version=2")
 (def checklists-url-seg "checklists")
 (def tasks-url-seg "tasks.json")
+;; checkvist API is very unreliable, so we rely on a small number of quick retries
+(def connection-defaults {:accept :json
+                          :cookie-policy :none
+                          :conn-timeout 5000
+                          :headers {"X-Client-Token" @creds}
+                          :content-type :json
+                          :debug true :debug-body true
+                          :retry-handler (fn [ex try-count http-context]
+                                           (println "retrying connection ..." )
+                                           (< try-count 5))})
 (defonce creds (atom nil))
 
 ;; TODO: checkvist api times out a lot. Strategy needed (does clj-http have anything useful like retries?)
@@ -20,8 +30,7 @@
                    :query-params {"username" username "remote_key" key}})
       (:body)
       (json/read-str)
-      (get "token")
-      ))
+      (get "token")))
 
 ;; don't really need this - it's just the simplest call to test the checkvist API with
 (defn- get-list-items [list-id]
@@ -32,6 +41,16 @@
                 {:accept :json
                  :cookie-policy :none
                  :headers {"X-Client-Token" @creds}})))
+
+(defn- create-task [list-id task-data]
+  (let [url (str (assoc (uri/uri base-url)
+                        :path (str/join "/"  [nil checklists-url-seg list-id tasks-url-seg])))]
+    (println "calling " url)
+    (client/post url (merge connection-defaults {:body (json/write-str task-data)}))))
+
+
+;; import hierarchy of tasks
+(defn- import-tasks [list-id tasks])
 
 ;; TODO: is it possible it's just the checkvist api? First call from Postman took 20s; about 500ms thereafter
 ;; I also just had it time out at the console
@@ -44,15 +63,9 @@
   (def g (client/get pc-url))
   (client/get "https://checkvist.com/checklists/774394/auth/login.json?version=2")
   (client/get "https://checkvist.com/auth/login.json?version=2&username=myself@crisbennett.com&remote_key=k9LPfkvwnjbIOY")
-  
+
+  (reset! creds (get-auth-token  "myself@crisbennett.com" "k9LPfkvwnjbIOY"))
   (get-list-items "774394")
-  (str (uri/join base-url checklists-url-seg "774394" tasks-url-seg))
-  (assoc (uri/uri "https://checkvist.com" )
-         :path (str/join "/" [nil checklists-url-seg, "774394", tasks-url-seg]))
-
-
-                                 (uri/join base-url get-token-url-seg)
-                                 (client/get "https://checkvist.com/ch")
-  ;; => (:cached :request-time :repeatable? :protocol-version :streaming? :http-client :chunked? :cookies :reason-phrase :headers :orig-content-encoding :status :length :body :trace-redirects)
-  ;; 
-                                 )
+  (def task-data {"content" "tested from clojure" "tags" {"#dev" false} "tags_as_text" "dev"})
+  (create-task "774394" task-data)
+  (json/write-str task-data))
