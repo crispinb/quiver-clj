@@ -66,4 +66,6 @@
       parse-notes
       walk/keywordize-keys))
 
-(comment (def n (note-dirs "Valid_notebook_with_two_notes.qvnotebnook")))
+(comment 
+  (def valid-note  (io/resource "Valid_notebook_with_two_notes.qvnotebook"))
+  (load-notes valid-note))

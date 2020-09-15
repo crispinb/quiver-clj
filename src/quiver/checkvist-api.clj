@@ -1,4 +1,4 @@
-(ns quiver.checkvist
+(ns quiver.checkvist-api
   (:require [clj-http.client :as client]
             [lambdaisland.uri :as uri]
             [clojure.data.json :as json]
@@ -11,8 +11,8 @@
 (def import-url-seg "import.json")
 
 ;; TODO: store data of last store/refresh
+;; refetch if nil or > 90 days
 ;; refresh if > 1day < 90 days
-;; refetch if > 90 days
 (defonce creds (atom nil))
 
 ;; checkvist API is very unreliable, so we rely on repeated quick retries
@@ -52,6 +52,8 @@
     (client/post url (merge connection-defaults {:body (json/write-str task-data)}))))
 
 ;; import hierarchy of tasks
+;; Note: checkvist api import function autodetects whether tasks-data is text
+;; or their custom xml (opml) format
 (defn- import-tasks [list-id tasks-data]
   (let [url (build-api-url  checklists-url-seg list-id import-url-seg)]
     (client/post url
@@ -65,6 +67,7 @@
   (get-list-items "774394")
   (def task-data {"content" "tested from clojure" "tags" {"#dev" false} "tags_as_text" "dev"})
   (def import-data "Top-level-item\n  sub item 1/1\n  sub item 1/2\n    sub item 2/1")
+  (def opml-import-data "")
   (create-task "774394" task-data)
   (import-tasks "774394" import-data)
   (json/write-str task-data))
